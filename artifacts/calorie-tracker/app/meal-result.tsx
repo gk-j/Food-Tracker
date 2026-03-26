@@ -14,7 +14,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import Colors from "@/constants/colors";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
@@ -115,29 +114,24 @@ export default function MealResultScreen() {
       >
         {/* Image */}
         {imageUri && (
-          <Animated.View entering={FadeInDown.duration(400)}>
-            <Image
-              source={{ uri: imageUri }}
-              style={styles.foodImage}
-              resizeMode="cover"
-            />
-          </Animated.View>
+          <Image
+            source={{ uri: imageUri }}
+            style={styles.foodImage}
+            resizeMode="cover"
+          />
         )}
 
         {/* Description */}
-        <Animated.View entering={FadeInDown.delay(80).duration(400)}>
-          <View style={styles.descCard}>
+        <View style={styles.descCard}>
             <Text style={styles.descTitle}>{analysis.description ?? "Analyzed meal"}</Text>
             <View style={styles.totalCalRow}>
               <Feather name="zap" size={16} color={Colors.dark.accent} />
               <Text style={styles.totalCalText}>{Math.round(analysis.totalCalories)} kcal total</Text>
             </View>
           </View>
-        </Animated.View>
 
         {/* Macro Summary */}
-        <Animated.View entering={FadeInDown.delay(160).duration(400)}>
-          <View style={styles.macroSummary}>
+        <View style={styles.macroSummary}>
             <View style={styles.macroItem}>
               <Text style={[styles.macroValue, { color: Colors.dark.protein }]}>
                 {Math.round(analysis.totalProtein)}g
@@ -159,24 +153,20 @@ export default function MealResultScreen() {
               <Text style={styles.macroItemLabel}>Fats</Text>
             </View>
           </View>
-        </Animated.View>
 
         {/* Health Score */}
         {analysis.healthScore != null && (
-          <Animated.View entering={FadeInDown.delay(220).duration(400)}>
-            <View style={styles.healthCard}>
+          <View style={styles.healthCard}>
               <View style={styles.healthScoreHeader}>
                 <Feather name="heart" size={16} color={Colors.dark.protein} />
                 <Text style={styles.healthScoreTitle}>Health Score</Text>
               </View>
               <HealthScoreBar score={analysis.healthScore} />
             </View>
-          </Animated.View>
         )}
 
         {/* Food Items */}
-        <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-          <View style={styles.section}>
+        <View style={styles.section}>
             <Text style={styles.sectionTitle}>Detected Foods</Text>
             {(analysis.foodItems ?? []).map((item: any, i: number) => (
               <View key={i} style={styles.foodItem}>
@@ -203,7 +193,6 @@ export default function MealResultScreen() {
               </View>
             ))}
           </View>
-        </Animated.View>
       </ScrollView>
 
       {/* Bottom Buttons */}

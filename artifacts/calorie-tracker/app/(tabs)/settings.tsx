@@ -14,7 +14,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import Colors from "@/constants/colors";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
@@ -200,8 +199,7 @@ export default function SettingsScreen() {
         <Text style={styles.screenTitle}>Settings</Text>
         <Text style={styles.screenSub}>Set your daily nutrition goals</Text>
 
-        <Animated.View entering={FadeInDown.delay(50).duration(400)}>
-          <View style={styles.section}>
+        <View style={styles.section}>
             <Text style={styles.sectionLabel}>Daily Goals</Text>
             <View style={styles.goalsList}>
               <GoalInput
@@ -238,11 +236,9 @@ export default function SettingsScreen() {
               />
             </View>
           </View>
-        </Animated.View>
 
         {/* Macro preview */}
-        <Animated.View entering={FadeInDown.delay(150).duration(400)}>
-          <View style={styles.previewCard}>
+        <View style={styles.previewCard}>
             <Text style={styles.previewTitle}>Calorie Breakdown</Text>
             <Text style={styles.previewSub}>Based on your macro goals</Text>
             {(() => {
@@ -290,11 +286,9 @@ export default function SettingsScreen() {
               );
             })()}
           </View>
-        </Animated.View>
 
         {/* About Section */}
-        <Animated.View entering={FadeInDown.delay(250).duration(400)}>
-          <View style={styles.aboutCard}>
+        <View style={styles.aboutCard}>
             <Feather name="zap" size={20} color={Colors.dark.accent} />
             <View style={{ flex: 1 }}>
               <Text style={styles.aboutTitle}>NutriSnap</Text>
@@ -303,7 +297,6 @@ export default function SettingsScreen() {
               </Text>
             </View>
           </View>
-        </Animated.View>
 
         {/* Save Button */}
         {isDirty && (

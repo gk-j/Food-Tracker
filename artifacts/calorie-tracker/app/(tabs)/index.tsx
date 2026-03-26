@@ -13,7 +13,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import Colors from "@/constants/colors";
 import { CircularProgress } from "@/components/CircularProgress";
 import { MacroCard } from "@/components/MacroCard";
@@ -136,8 +135,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Calorie Ring Card */}
-        <Animated.View entering={FadeInDown.delay(50).duration(500)}>
-          <View style={styles.calorieCard}>
+        <View style={styles.calorieCard}>
             <View style={styles.calorieLeft}>
               <Text style={styles.calorieNumber}>{Math.round(caloriesLeft)}</Text>
               <Text style={styles.calorieSubtext}>
@@ -171,74 +169,69 @@ export default function HomeScreen() {
               </View>
             </CircularProgress>
           </View>
-        </Animated.View>
 
         {/* Macro Cards */}
-        <Animated.View entering={FadeInDown.delay(150).duration(500)}>
-          <View style={styles.macroGrid}>
-            <MacroCard
-              label="Protein"
-              value={daily?.totalProtein ?? 0}
-              goal={daily?.proteinGoal ?? 150}
-              color={Colors.dark.protein}
-              glow={Colors.dark.proteinGlow}
-              isOver={(daily?.totalProtein ?? 0) > (daily?.proteinGoal ?? 150)}
-            />
-            <MacroCard
-              label="Carbs"
-              value={daily?.totalCarbs ?? 0}
-              goal={daily?.carbGoal ?? 250}
-              color={Colors.dark.carbs}
-              glow={Colors.dark.carbsGlow}
-              isOver={(daily?.totalCarbs ?? 0) > (daily?.carbGoal ?? 250)}
-            />
+        <View style={styles.macroGrid}>
+          <MacroCard
+            label="Protein"
+            value={daily?.totalProtein ?? 0}
+            goal={daily?.proteinGoal ?? 150}
+            color={Colors.dark.protein}
+            glow={Colors.dark.proteinGlow}
+            isOver={(daily?.totalProtein ?? 0) > (daily?.proteinGoal ?? 150)}
+          />
+          <MacroCard
+            label="Carbs"
+            value={daily?.totalCarbs ?? 0}
+            goal={daily?.carbGoal ?? 250}
+            color={Colors.dark.carbs}
+            glow={Colors.dark.carbsGlow}
+            isOver={(daily?.totalCarbs ?? 0) > (daily?.carbGoal ?? 250)}
+          />
+        </View>
+        <View style={[styles.macroGrid, { marginTop: 10 }]}>
+          <MacroCard
+            label="Fats"
+            value={daily?.totalFats ?? 0}
+            goal={daily?.fatGoal ?? 65}
+            color={Colors.dark.fats}
+            glow={Colors.dark.fatsGlow}
+            isOver={(daily?.totalFats ?? 0) > (daily?.fatGoal ?? 65)}
+          />
+          <View style={{ flex: 1, backgroundColor: Colors.dark.card, borderRadius: 16, borderWidth: 1, borderColor: Colors.dark.cardBorder, padding: 14, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontFamily: "Inter_700Bold", fontSize: 22, color: Colors.dark.text }}>
+              {(daily?.meals ?? []).length}
+            </Text>
+            <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.dark.textSecondary, marginTop: 4 }}>
+              meals today
+            </Text>
           </View>
-          <View style={[styles.macroGrid, { marginTop: 10 }]}>
-            <MacroCard
-              label="Fats"
-              value={daily?.totalFats ?? 0}
-              goal={daily?.fatGoal ?? 65}
-              color={Colors.dark.fats}
-              glow={Colors.dark.fatsGlow}
-              isOver={(daily?.totalFats ?? 0) > (daily?.fatGoal ?? 65)}
-            />
-            <View style={{ flex: 1, backgroundColor: Colors.dark.card, borderRadius: 16, borderWidth: 1, borderColor: Colors.dark.cardBorder, padding: 14, alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ fontFamily: "Inter_700Bold", fontSize: 22, color: Colors.dark.text }}>
-                {(daily?.meals ?? []).length}
-              </Text>
-              <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.dark.textSecondary, marginTop: 4 }}>
-                meals today
-              </Text>
-            </View>
-          </View>
-        </Animated.View>
+        </View>
 
         {/* Meals List */}
-        <Animated.View entering={FadeInDown.delay(250).duration(500)}>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recently uploaded</Text>
-            {(daily?.meals ?? []).length === 0 ? (
-              <View style={styles.emptyState}>
-                <Feather name="camera" size={36} color={Colors.dark.textMuted} />
-                <Text style={styles.emptyTitle}>No meals yet</Text>
-                <Text style={styles.emptySubtitle}>
-                  Tap the + button to snap a photo of your meal
-                </Text>
-              </View>
-            ) : (
-              <View style={styles.mealsList}>
-                {(daily?.meals ?? []).map((meal: any, i: number) => (
-                  <Animated.View key={meal.id} entering={FadeInDown.delay(i * 50).duration(400)}>
-                    <MealCard
-                      meal={meal}
-                      onDelete={() => deleteMealMutation.mutate(meal.id)}
-                    />
-                  </Animated.View>
-                ))}
-              </View>
-            )}
-          </View>
-        </Animated.View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Recently uploaded</Text>
+          {(daily?.meals ?? []).length === 0 ? (
+            <View style={styles.emptyState}>
+              <Feather name="camera" size={36} color={Colors.dark.textMuted} />
+              <Text style={styles.emptyTitle}>No meals yet</Text>
+              <Text style={styles.emptySubtitle}>
+                Tap the + button to snap a photo of your meal
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.mealsList}>
+              {(daily?.meals ?? []).map((meal: any) => (
+                <View key={meal.id}>
+                  <MealCard
+                    meal={meal}
+                    onDelete={() => deleteMealMutation.mutate(meal.id)}
+                  />
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
       </ScrollView>
 
       {/* FAB */}

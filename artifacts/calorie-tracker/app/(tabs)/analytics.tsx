@@ -12,7 +12,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import Colors from "@/constants/colors";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
@@ -248,8 +247,7 @@ export default function AnalyticsScreen() {
         )}
 
         {/* Chart */}
-        <Animated.View entering={FadeInDown.duration(400)}>
-          <View style={styles.chartCard}>
+        <View style={styles.chartCard}>
             <Text style={styles.chartTitle}>Calories</Text>
             {days.length > 0 ? (
               <BarChart
@@ -263,11 +261,9 @@ export default function AnalyticsScreen() {
               </View>
             )}
           </View>
-        </Animated.View>
 
         {/* Avg Stats */}
-        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
-          <View style={styles.statsSection}>
+        <View style={styles.statsSection}>
             <Text style={styles.sectionTitle}>
               {view === "weekly" ? "Weekly" : "Monthly"} Averages
             </Text>
@@ -303,12 +299,10 @@ export default function AnalyticsScreen() {
               />
             </View>
           </View>
-        </Animated.View>
 
         {/* Macro Breakdown */}
         {avgCal > 0 && (
-          <Animated.View entering={FadeInDown.delay(200).duration(400)}>
-            <View style={styles.macroBreakdown}>
+          <View style={styles.macroBreakdown}>
               <Text style={styles.sectionTitle}>Macro Breakdown</Text>
               <View style={styles.macroBar}>
                 {(() => {
@@ -340,7 +334,7 @@ export default function AnalyticsScreen() {
                 </View>
               </View>
             </View>
-          </Animated.View>
+          </View>
         )}
       </ScrollView>
     </View>
