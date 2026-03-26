@@ -33,33 +33,7 @@ router.post("/meals/analyze", async (req, res) => {
 
   const { imageBase64 } = parsed.data;
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-5.2",
-      max_completion_tokens: 2048,
-      messages: [
-        {
-          role: "system",
-          content: `You are a professional nutritionist and food recognition AI. When given an image of food, you must:
-1. Identify all food items visible in the image
-2. Estimate realistic portion sizes 
-3. Calculate accurate nutritional information for each item
-4. Return a JSON object with the exact structure specified
-
-Be accurate and realistic with your estimates. Use standard nutritional databases as reference.`,
-        },
-        {
-          role: "user",
-          content: [
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:image/jpeg;base64,${imageBase64}`,
-              },
-            },
-            {
-              type: "text",
-              text: `Analyze this food image and return ONLY valid JSON in this exact format:
+  const prompt = `Analyze this food image and return ONLY valid JSON in this exact format (no markdown, no code blocks):
 {
   "description": "Brief description of the meal",
   "healthScore": <number 1-10>,
@@ -79,8 +53,26 @@ Be accurate and realistic with your estimates. Use standard nutritional database
   "totalProtein": <sum of all protein grams>,
   "totalCarbs": <sum of all carb grams>,
   "totalFats": <sum of all fat grams>
-}`,
+}`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-5.2",
+      max_completion_tokens: 8192,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a professional nutritionist and food recognition AI. Identify all food items, estimate realistic portion sizes, and calculate accurate nutritional information. Return ONLY valid JSON — no markdown, no explanations.",
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
             },
+            { type: "text", text: prompt },
           ],
         },
       ],

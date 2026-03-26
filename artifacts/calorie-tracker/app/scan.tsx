@@ -25,6 +25,7 @@ const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
 export default function ScanScreen() {
   const insets = useSafeAreaInsets();
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const pickImage = useCallback(async (fromCamera: boolean) => {
@@ -39,19 +40,25 @@ export default function ScanScreen() {
         }
         result = await ImagePicker.launchCameraAsync({
           mediaTypes: ["images"],
-          quality: 0.7,
+          quality: 0.6,
           base64: true,
+          exif: false,
+          allowsEditing: false,
         });
       } else {
         result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ["images"],
-          quality: 0.7,
+          quality: 0.6,
           base64: true,
+          exif: false,
+          allowsEditing: false,
         });
       }
 
       if (!result.canceled && result.assets[0]) {
-        setImageUri(result.assets[0].uri);
+        const asset = result.assets[0];
+        setImageUri(asset.uri);
+        setImageBase64(asset.base64 ?? null);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
     } catch (err) {
@@ -66,23 +73,25 @@ export default function ScanScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      let base64: string | undefined;
+      let base64: string | undefined = imageBase64 ?? undefined;
 
-      if (Platform.OS === "web") {
-        const response = await fetch(imageUri);
-        const blob = await response.blob();
-        base64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const result = reader.result as string;
-            resolve(result.split(",")[1]);
-          };
-          reader.readAsDataURL(blob);
-        });
-      } else {
-        base64 = await FileSystem.readAsStringAsync(imageUri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
+      if (!base64) {
+        if (Platform.OS === "web") {
+          const response = await fetch(imageUri);
+          const blob = await response.blob();
+          base64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const r = reader.result as string;
+              resolve(r.split(",")[1]);
+            };
+            reader.readAsDataURL(blob);
+          });
+        } else {
+          base64 = await FileSystem.readAsStringAsync(imageUri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+        }
       }
 
       if (!base64) throw new Error("Failed to read image");
@@ -109,7 +118,7 @@ export default function ScanScreen() {
       Alert.alert("Analysis failed", "Could not analyze the image. Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
-  }, [imageUri]);
+  }, [imageUri, imageBase64]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
