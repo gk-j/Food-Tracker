@@ -1,0 +1,31 @@
+const Colors = {
+  dark: {
+    background: "#0A0A0A",
+    backgroundSecondary: "#141414",
+    backgroundTertiary: "#1C1C1C",
+    card: "#161616",
+    cardBorder: "#242424",
+    text: "#FFFFFF",
+    textSecondary: "#8A8A8A",
+    textMuted: "#4A4A4A",
+    accent: "#FF6B35",
+    accentSecondary: "#FF8C5A",
+    accentGlow: "rgba(255, 107, 53, 0.2)",
+    protein: "#E84393",
+    proteinGlow: "rgba(232, 67, 147, 0.2)",
+    carbs: "#F59E0B",
+    carbsGlow: "rgba(245, 158, 11, 0.2)",
+    fats: "#3B82F6",
+    fatsGlow: "rgba(59, 130, 246, 0.2)",
+    success: "#22C55E",
+    successGlow: "rgba(34, 197, 94, 0.2)",
+    danger: "#EF4444",
+    tabBar: "#0F0F0F",
+    tabBarActive: "#FF6B35",
+    tabBarInactive: "#444444",
+    separator: "#1E1E1E",
+    streak: "#FF6B35",
+  },
+};
+
+export default Colors;

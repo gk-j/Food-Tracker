@@ -1,15 +1,20 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Calorie Tracker API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: meals
+    description: Meal logging operations
+  - name: analytics
+    description: Nutrition analytics
+  - name: settings
+    description: User settings
 paths:
   /healthz:
     get:
@@ -24,6 +29,173 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /meals/analyze:
+    post:
+      operationId: analyzeFoodImage
+      tags: [meals]
+      summary: Analyze food image with AI
+      description: Analyzes a food image and returns nutritional information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeImageRequest"
+      responses:
+        "200":
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyzeImageResponse"
+
+  /meals:
+    get:
+      operationId: getMeals
+      tags: [meals]
+      summary: Get meals for a date
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            description: Date in YYYY-MM-DD format
+      responses:
+        "200":
+          description: List of meals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Meal"
+    post:
+      operationId: logMeal
+      tags: [meals]
+      summary: Log a meal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogMealRequest"
+      responses:
+        "201":
+          description: Logged meal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Meal"
+
+  /meals/{id}:
+    delete:
+      operationId: deleteMeal
+      tags: [meals]
+      summary: Delete a meal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Meal deleted
+
+  /analytics/daily:
+    get:
+      operationId: getDailySummary
+      tags: [analytics]
+      summary: Get daily nutrition summary
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Daily summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailySummary"
+
+  /analytics/weekly:
+    get:
+      operationId: getWeeklySummary
+      tags: [analytics]
+      summary: Get weekly nutrition data
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Weekly summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklySummary"
+
+  /analytics/monthly:
+    get:
+      operationId: getMonthlySummary
+      tags: [analytics]
+      summary: Get monthly nutrition data
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Monthly summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonthlySummary"
+
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get user settings
+      responses:
+        "200":
+          description: User settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+    put:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update user settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingsRequest"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +206,312 @@ components:
       required:
         - status
 
+    NutritionData:
+      type: object
+      properties:
+        calories:
+          type: number
+        protein:
+          type: number
+        carbs:
+          type: number
+        fats:
+          type: number
+        fiber:
+          type: number
+        sugar:
+          type: number
+      required:
+        - calories
+        - protein
+        - carbs
+        - fats
+
+    FoodItem:
+      type: object
+      properties:
+        name:
+          type: string
+        portion:
+          type: string
+        calories:
+          type: number
+        protein:
+          type: number
+        carbs:
+          type: number
+        fats:
+          type: number
+        fiber:
+          type: number
+        sugar:
+          type: number
+      required:
+        - name
+        - calories
+        - protein
+        - carbs
+        - fats
+
+    Meal:
+      type: object
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+        time:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        foodItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/FoodItem"
+        totalCalories:
+          type: number
+        totalProtein:
+          type: number
+        totalCarbs:
+          type: number
+        totalFats:
+          type: number
+        healthScore:
+          type: number
+          nullable: true
+      required:
+        - id
+        - date
+        - time
+        - foodItems
+        - totalCalories
+        - totalProtein
+        - totalCarbs
+        - totalFats
+
+    LogMealRequest:
+      type: object
+      properties:
+        date:
+          type: string
+        time:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        foodItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/FoodItem"
+        totalCalories:
+          type: number
+        totalProtein:
+          type: number
+        totalCarbs:
+          type: number
+        totalFats:
+          type: number
+        healthScore:
+          type: number
+          nullable: true
+      required:
+        - date
+        - time
+        - foodItems
+        - totalCalories
+        - totalProtein
+        - totalCarbs
+        - totalFats
+
+    AnalyzeImageRequest:
+      type: object
+      properties:
+        imageBase64:
+          type: string
+      required:
+        - imageBase64
+
+    AnalyzeImageResponse:
+      type: object
+      properties:
+        foodItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/FoodItem"
+        totalCalories:
+          type: number
+        totalProtein:
+          type: number
+        totalCarbs:
+          type: number
+        totalFats:
+          type: number
+        healthScore:
+          type: number
+        description:
+          type: string
+      required:
+        - foodItems
+        - totalCalories
+        - totalProtein
+        - totalCarbs
+        - totalFats
+        - healthScore
+        - description
+
+    DailySummary:
+      type: object
+      properties:
+        date:
+          type: string
+        totalCalories:
+          type: number
+        totalProtein:
+          type: number
+        totalCarbs:
+          type: number
+        totalFats:
+          type: number
+        meals:
+          type: array
+          items:
+            $ref: "#/components/schemas/Meal"
+        calorieGoal:
+          type: number
+        proteinGoal:
+          type: number
+        carbGoal:
+          type: number
+        fatGoal:
+          type: number
+      required:
+        - date
+        - totalCalories
+        - totalProtein
+        - totalCarbs
+        - totalFats
+        - meals
+        - calorieGoal
+        - proteinGoal
+        - carbGoal
+        - fatGoal
+
+    DayData:
+      type: object
+      properties:
+        date:
+          type: string
+        calories:
+          type: number
+        protein:
+          type: number
+        carbs:
+          type: number
+        fats:
+          type: number
+      required:
+        - date
+        - calories
+        - protein
+        - carbs
+        - fats
+
+    WeeklySummary:
+      type: object
+      properties:
+        startDate:
+          type: string
+        endDate:
+          type: string
+        days:
+          type: array
+          items:
+            $ref: "#/components/schemas/DayData"
+        averageCalories:
+          type: number
+        averageProtein:
+          type: number
+        averageCarbs:
+          type: number
+        averageFats:
+          type: number
+      required:
+        - startDate
+        - endDate
+        - days
+        - averageCalories
+        - averageProtein
+        - averageCarbs
+        - averageFats
+
+    MonthlySummary:
+      type: object
+      properties:
+        year:
+          type: integer
+        month:
+          type: integer
+        days:
+          type: array
+          items:
+            $ref: "#/components/schemas/DayData"
+        averageCalories:
+          type: number
+        averageProtein:
+          type: number
+        averageCarbs:
+          type: number
+        averageFats:
+          type: number
+      required:
+        - year
+        - month
+        - days
+        - averageCalories
+        - averageProtein
+        - averageCarbs
+        - averageFats
+
+    UserSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        dailyCalorieGoal:
+          type: number
+        dailyProteinGoal:
+          type: number
+        dailyCarbGoal:
+          type: number
+        dailyFatGoal:
+          type: number
+      required:
+        - id
+        - dailyCalorieGoal
+        - dailyProteinGoal
+        - dailyCarbGoal
+        - dailyFatGoal
+
+    UpdateSettingsRequest:
+      type: object
+      properties:
+        dailyCalorieGoal:
+          type: number
+        dailyProteinGoal:
+          type: number
+        dailyCarbGoal:
+          type: number
+        dailyFatGoal:
+          type: number
+      required:
+        - dailyCalorieGoal
+        - dailyProteinGoal
+        - dailyCarbGoal
+        - dailyFatGoal
