@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -30,10 +30,8 @@ function formatDisplayDate(date: Date): string {
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-
   if (formatDate(date) === formatDate(today)) return "Today";
   if (formatDate(date) === formatDate(yesterday)) return "Yesterday";
-
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
@@ -41,7 +39,6 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const queryClient = useQueryClient();
-
   const dateStr = formatDate(selectedDate);
 
   const { data: daily, isLoading, refetch } = useQuery({
@@ -84,7 +81,6 @@ export default function HomeScreen() {
   const calorieGoal = daily?.calorieGoal ?? 2000;
   const caloriesLeft = Math.max(calorieGoal - totalCalories, 0);
   const caloriePct = Math.min(totalCalories / calorieGoal, 1);
-
   const isToday = formatDate(selectedDate) === formatDate(new Date());
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -107,9 +103,7 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.appTitle}>
-            <Text style={styles.appName}>NutriSnap</Text>
-          </View>
+          <Text style={styles.appName}>NutriSnap</Text>
           <View style={styles.streakBadge}>
             <Feather name="zap" size={14} color={Colors.dark.accent} />
             <Text style={styles.streakText}>Track</Text>
@@ -136,39 +130,39 @@ export default function HomeScreen() {
 
         {/* Calorie Ring Card */}
         <View style={styles.calorieCard}>
-            <View style={styles.calorieLeft}>
-              <Text style={styles.calorieNumber}>{Math.round(caloriesLeft)}</Text>
-              <Text style={styles.calorieSubtext}>
-                {totalCalories > calorieGoal ? "calories over" : "calories left"}
-              </Text>
-              <View style={styles.calorieBreakdown}>
-                <View style={styles.calorieBreakdownItem}>
-                  <Text style={styles.calorieBreakdownLabel}>Goal</Text>
-                  <Text style={styles.calorieBreakdownValue}>{calorieGoal}</Text>
-                </View>
-                <View style={styles.calorieBreakdownSep} />
-                <View style={styles.calorieBreakdownItem}>
-                  <Text style={styles.calorieBreakdownLabel}>Eaten</Text>
-                  <Text style={styles.calorieBreakdownValue}>{Math.round(totalCalories)}</Text>
-                </View>
+          <View style={styles.calorieLeft}>
+            <Text style={styles.calorieNumber}>{Math.round(caloriesLeft)}</Text>
+            <Text style={styles.calorieSubtext}>
+              {totalCalories > calorieGoal ? "calories over" : "calories left"}
+            </Text>
+            <View style={styles.calorieBreakdown}>
+              <View style={styles.calorieBreakdownItem}>
+                <Text style={styles.calorieBreakdownLabel}>Goal</Text>
+                <Text style={styles.calorieBreakdownValue}>{calorieGoal}</Text>
+              </View>
+              <View style={styles.calorieBreakdownSep} />
+              <View style={styles.calorieBreakdownItem}>
+                <Text style={styles.calorieBreakdownLabel}>Eaten</Text>
+                <Text style={styles.calorieBreakdownValue}>{Math.round(totalCalories)}</Text>
               </View>
             </View>
-            <CircularProgress
-              size={120}
-              strokeWidth={10}
-              progress={caloriePct}
-              color={totalCalories > calorieGoal ? Colors.dark.danger : Colors.dark.accent}
-              trackColor="rgba(255,255,255,0.06)"
-            >
-              <View style={styles.ringCenter}>
-                <Feather
-                  name="zap"
-                  size={22}
-                  color={totalCalories > calorieGoal ? Colors.dark.danger : Colors.dark.accent}
-                />
-              </View>
-            </CircularProgress>
           </View>
+          <CircularProgress
+            size={120}
+            strokeWidth={10}
+            progress={caloriePct}
+            color={totalCalories > calorieGoal ? Colors.dark.danger : Colors.dark.accent}
+            trackColor="rgba(255,255,255,0.06)"
+          >
+            <View style={styles.ringCenter}>
+              <Feather
+                name="zap"
+                size={22}
+                color={totalCalories > calorieGoal ? Colors.dark.danger : Colors.dark.accent}
+              />
+            </View>
+          </CircularProgress>
+        </View>
 
         {/* Macro Cards */}
         <View style={styles.macroGrid}>
@@ -198,13 +192,9 @@ export default function HomeScreen() {
             glow={Colors.dark.fatsGlow}
             isOver={(daily?.totalFats ?? 0) > (daily?.fatGoal ?? 65)}
           />
-          <View style={{ flex: 1, backgroundColor: Colors.dark.card, borderRadius: 16, borderWidth: 1, borderColor: Colors.dark.cardBorder, padding: 14, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontFamily: "Inter_700Bold", fontSize: 22, color: Colors.dark.text }}>
-              {(daily?.meals ?? []).length}
-            </Text>
-            <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.dark.textSecondary, marginTop: 4 }}>
-              meals today
-            </Text>
+          <View style={styles.mealsCountCard}>
+            <Text style={styles.mealsCountNumber}>{(daily?.meals ?? []).length}</Text>
+            <Text style={styles.mealsCountLabel}>meals today</Text>
           </View>
         </View>
 
@@ -222,12 +212,11 @@ export default function HomeScreen() {
           ) : (
             <View style={styles.mealsList}>
               {(daily?.meals ?? []).map((meal: any) => (
-                <View key={meal.id}>
-                  <MealCard
-                    meal={meal}
-                    onDelete={() => deleteMealMutation.mutate(meal.id)}
-                  />
-                </View>
+                <MealCard
+                  key={meal.id}
+                  meal={meal}
+                  onDelete={() => deleteMealMutation.mutate(meal.id)}
+                />
               ))}
             </View>
           )}
@@ -236,10 +225,7 @@ export default function HomeScreen() {
 
       {/* FAB */}
       <Pressable
-        style={[
-          styles.fab,
-          { bottom: (Platform.OS === "web" ? 84 + 34 : 84) + 16 },
-        ]}
+        style={[styles.fab, { bottom: (Platform.OS === "web" ? 84 + 34 : 84) + 16 }]}
         onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
           router.push("/scan");
@@ -254,17 +240,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { paddingHorizontal: 16, gap: 16 },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  appTitle: { flexDirection: "row", alignItems: "center", gap: 8 },
-  appName: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 24,
-    color: Colors.dark.text,
-  },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  appName: { fontFamily: "Inter_700Bold", fontSize: 24, color: Colors.dark.text },
   streakBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -276,11 +253,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.dark.accent,
   },
-  streakText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-    color: Colors.dark.accent,
-  },
+  streakText: { fontFamily: "Inter_600SemiBold", fontSize: 13, color: Colors.dark.accent },
   dateSelector: {
     flexDirection: "row",
     alignItems: "center",
@@ -307,64 +280,37 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   calorieLeft: { flex: 1, gap: 4 },
-  calorieNumber: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 42,
-    color: Colors.dark.text,
-    lineHeight: 48,
-  },
-  calorieSubtext: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    color: Colors.dark.textSecondary,
-  },
-  calorieBreakdown: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginTop: 10,
-  },
+  calorieNumber: { fontFamily: "Inter_700Bold", fontSize: 42, color: Colors.dark.text, lineHeight: 48 },
+  calorieSubtext: { fontFamily: "Inter_400Regular", fontSize: 13, color: Colors.dark.textSecondary },
+  calorieBreakdown: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 10 },
   calorieBreakdownItem: { gap: 2 },
-  calorieBreakdownLabel: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 11,
-    color: Colors.dark.textMuted,
-  },
-  calorieBreakdownValue: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-    color: Colors.dark.textSecondary,
-  },
-  calorieBreakdownSep: {
-    width: 1,
-    height: 24,
-    backgroundColor: Colors.dark.separator,
-  },
-  ringCenter: {
+  calorieBreakdownLabel: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.dark.textMuted },
+  calorieBreakdownValue: { fontFamily: "Inter_600SemiBold", fontSize: 13, color: Colors.dark.textSecondary },
+  calorieBreakdownSep: { width: 1, height: 24, backgroundColor: Colors.dark.separator },
+  ringCenter: { alignItems: "center", justifyContent: "center" },
+  macroGrid: { flexDirection: "row", gap: 10 },
+  mealsCountCard: {
+    flex: 1,
+    backgroundColor: Colors.dark.card,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+    padding: 14,
     alignItems: "center",
     justifyContent: "center",
   },
-  macroGrid: {
-    flexDirection: "row",
-    gap: 10,
+  mealsCountNumber: { fontFamily: "Inter_700Bold", fontSize: 22, color: Colors.dark.text },
+  mealsCountLabel: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 11,
+    color: Colors.dark.textSecondary,
+    marginTop: 4,
   },
   section: { gap: 12 },
-  sectionTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 20,
-    color: Colors.dark.text,
-  },
+  sectionTitle: { fontFamily: "Inter_700Bold", fontSize: 20, color: Colors.dark.text },
   mealsList: { gap: 10 },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: 48,
-    gap: 10,
-  },
-  emptyTitle: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 17,
-    color: Colors.dark.textSecondary,
-  },
+  emptyState: { alignItems: "center", paddingVertical: 48, gap: 10 },
+  emptyTitle: { fontFamily: "Inter_600SemiBold", fontSize: 17, color: Colors.dark.textSecondary },
   emptySubtitle: {
     fontFamily: "Inter_400Regular",
     fontSize: 14,

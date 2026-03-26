@@ -63,7 +63,6 @@ export default function MealResultScreen() {
   const handleSave = async () => {
     setIsSaving(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
     try {
       const now = new Date();
       const res = await fetch(`${API_BASE}/meals`, {
@@ -81,9 +80,7 @@ export default function MealResultScreen() {
           healthScore: analysis.healthScore,
         }),
       });
-
       if (!res.ok) throw new Error("Failed to save");
-
       queryClient.invalidateQueries({ queryKey: ["daily"] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.dismiss();
@@ -95,7 +92,7 @@ export default function MealResultScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: Colors.dark.background }]}>
+    <View style={styles.container}>
       <View style={[styles.header, { paddingTop: topPad + 8 }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Feather name="chevron-left" size={22} color={Colors.dark.text} />
@@ -106,101 +103,89 @@ export default function MealResultScreen() {
 
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: insets.bottom + 100 },
-        ]}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Image */}
         {imageUri && (
-          <Image
-            source={{ uri: imageUri }}
-            style={styles.foodImage}
-            resizeMode="cover"
-          />
+          <Image source={{ uri: imageUri }} style={styles.foodImage} resizeMode="cover" />
         )}
 
         {/* Description */}
         <View style={styles.descCard}>
-            <Text style={styles.descTitle}>{analysis.description ?? "Analyzed meal"}</Text>
-            <View style={styles.totalCalRow}>
-              <Feather name="zap" size={16} color={Colors.dark.accent} />
-              <Text style={styles.totalCalText}>{Math.round(analysis.totalCalories)} kcal total</Text>
-            </View>
+          <Text style={styles.descTitle}>{analysis.description ?? "Analyzed meal"}</Text>
+          <View style={styles.totalCalRow}>
+            <Feather name="zap" size={16} color={Colors.dark.accent} />
+            <Text style={styles.totalCalText}>{Math.round(analysis.totalCalories)} kcal total</Text>
           </View>
+        </View>
 
         {/* Macro Summary */}
         <View style={styles.macroSummary}>
-            <View style={styles.macroItem}>
-              <Text style={[styles.macroValue, { color: Colors.dark.protein }]}>
-                {Math.round(analysis.totalProtein)}g
-              </Text>
-              <Text style={styles.macroItemLabel}>Protein</Text>
-            </View>
-            <View style={styles.macroDivider} />
-            <View style={styles.macroItem}>
-              <Text style={[styles.macroValue, { color: Colors.dark.carbs }]}>
-                {Math.round(analysis.totalCarbs)}g
-              </Text>
-              <Text style={styles.macroItemLabel}>Carbs</Text>
-            </View>
-            <View style={styles.macroDivider} />
-            <View style={styles.macroItem}>
-              <Text style={[styles.macroValue, { color: Colors.dark.fats }]}>
-                {Math.round(analysis.totalFats)}g
-              </Text>
-              <Text style={styles.macroItemLabel}>Fats</Text>
-            </View>
+          <View style={styles.macroItem}>
+            <Text style={[styles.macroValue, { color: Colors.dark.protein }]}>
+              {Math.round(analysis.totalProtein)}g
+            </Text>
+            <Text style={styles.macroItemLabel}>Protein</Text>
           </View>
+          <View style={styles.macroDivider} />
+          <View style={styles.macroItem}>
+            <Text style={[styles.macroValue, { color: Colors.dark.carbs }]}>
+              {Math.round(analysis.totalCarbs)}g
+            </Text>
+            <Text style={styles.macroItemLabel}>Carbs</Text>
+          </View>
+          <View style={styles.macroDivider} />
+          <View style={styles.macroItem}>
+            <Text style={[styles.macroValue, { color: Colors.dark.fats }]}>
+              {Math.round(analysis.totalFats)}g
+            </Text>
+            <Text style={styles.macroItemLabel}>Fats</Text>
+          </View>
+        </View>
 
         {/* Health Score */}
         {analysis.healthScore != null && (
           <View style={styles.healthCard}>
-              <View style={styles.healthScoreHeader}>
-                <Feather name="heart" size={16} color={Colors.dark.protein} />
-                <Text style={styles.healthScoreTitle}>Health Score</Text>
-              </View>
-              <HealthScoreBar score={analysis.healthScore} />
+            <View style={styles.healthScoreHeader}>
+              <Feather name="heart" size={16} color={Colors.dark.protein} />
+              <Text style={styles.healthScoreTitle}>Health Score</Text>
             </View>
+            <HealthScoreBar score={analysis.healthScore} />
+          </View>
         )}
 
         {/* Food Items */}
         <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Detected Foods</Text>
-            {(analysis.foodItems ?? []).map((item: any, i: number) => (
-              <View key={i} style={styles.foodItem}>
-                <View style={styles.foodItemLeft}>
-                  <Text style={styles.foodItemName}>{item.name}</Text>
-                  {item.portion && (
-                    <Text style={styles.foodItemPortion}>{item.portion}</Text>
-                  )}
-                </View>
-                <View style={styles.foodItemRight}>
-                  <Text style={styles.foodItemCal}>{Math.round(item.calories)} kcal</Text>
-                  <View style={styles.foodItemMacros}>
-                    <Text style={[styles.foodItemMacro, { color: Colors.dark.protein }]}>
-                      P {Math.round(item.protein)}g
-                    </Text>
-                    <Text style={[styles.foodItemMacro, { color: Colors.dark.carbs }]}>
-                      C {Math.round(item.carbs)}g
-                    </Text>
-                    <Text style={[styles.foodItemMacro, { color: Colors.dark.fats }]}>
-                      F {Math.round(item.fats)}g
-                    </Text>
-                  </View>
+          <Text style={styles.sectionTitle}>Detected Foods</Text>
+          {(analysis.foodItems ?? []).map((item: any, i: number) => (
+            <View key={i} style={styles.foodItem}>
+              <View style={styles.foodItemLeft}>
+                <Text style={styles.foodItemName}>{item.name}</Text>
+                {item.portion && <Text style={styles.foodItemPortion}>{item.portion}</Text>}
+              </View>
+              <View style={styles.foodItemRight}>
+                <Text style={styles.foodItemCal}>{Math.round(item.calories)} kcal</Text>
+                <View style={styles.foodItemMacros}>
+                  <Text style={[styles.foodItemMacro, { color: Colors.dark.protein }]}>
+                    P {Math.round(item.protein)}g
+                  </Text>
+                  <Text style={[styles.foodItemMacro, { color: Colors.dark.carbs }]}>
+                    C {Math.round(item.carbs)}g
+                  </Text>
+                  <Text style={[styles.foodItemMacro, { color: Colors.dark.fats }]}>
+                    F {Math.round(item.fats)}g
+                  </Text>
                 </View>
               </View>
-            ))}
-          </View>
+            </View>
+          ))}
+        </View>
       </ScrollView>
 
-      {/* Bottom Buttons */}
+      {/* Footer */}
       <View
-        style={[
-          styles.footer,
-          { paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 16) },
-        ]}
+        style={[styles.footer, { paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 16) }]}
       >
         <Pressable style={styles.discardButton} onPress={() => router.back()}>
           <Text style={styles.discardText}>Discard</Text>
@@ -234,22 +219,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 18,
-    color: Colors.dark.text,
-  },
-  content: {
-    paddingHorizontal: 16,
-    gap: 14,
-    paddingTop: 8,
-  },
-  foodImage: {
-    width: "100%",
-    height: 220,
-    borderRadius: 20,
-    backgroundColor: Colors.dark.card,
-  },
+  headerTitle: { fontFamily: "Inter_700Bold", fontSize: 18, color: Colors.dark.text },
+  content: { paddingHorizontal: 16, gap: 14, paddingTop: 8 },
+  foodImage: { width: "100%", height: 220, borderRadius: 20, backgroundColor: Colors.dark.card },
   descCard: {
     backgroundColor: Colors.dark.card,
     borderRadius: 16,
@@ -258,22 +230,9 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 8,
   },
-  descTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 18,
-    color: Colors.dark.text,
-    lineHeight: 24,
-  },
-  totalCalRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  totalCalText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
-    color: Colors.dark.accent,
-  },
+  descTitle: { fontFamily: "Inter_700Bold", fontSize: 18, color: Colors.dark.text, lineHeight: 24 },
+  totalCalRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  totalCalText: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: Colors.dark.accent },
   macroSummary: {
     flexDirection: "row",
     backgroundColor: Colors.dark.card,
@@ -282,24 +241,10 @@ const styles = StyleSheet.create({
     borderColor: Colors.dark.cardBorder,
     padding: 16,
   },
-  macroItem: {
-    flex: 1,
-    alignItems: "center",
-    gap: 4,
-  },
-  macroValue: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 22,
-  },
-  macroItemLabel: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 12,
-    color: Colors.dark.textMuted,
-  },
-  macroDivider: {
-    width: 1,
-    backgroundColor: Colors.dark.separator,
-  },
+  macroItem: { flex: 1, alignItems: "center", gap: 4 },
+  macroValue: { fontFamily: "Inter_700Bold", fontSize: 22 },
+  macroItemLabel: { fontFamily: "Inter_400Regular", fontSize: 12, color: Colors.dark.textMuted },
+  macroDivider: { width: 1, backgroundColor: Colors.dark.separator },
   healthCard: {
     backgroundColor: Colors.dark.card,
     borderRadius: 16,
@@ -308,21 +253,9 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 12,
   },
-  healthScoreHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  healthScoreTitle: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 15,
-    color: Colors.dark.text,
-  },
-  healthScoreRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
+  healthScoreHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
+  healthScoreTitle: { fontFamily: "Inter_600SemiBold", fontSize: 15, color: Colors.dark.text },
+  healthScoreRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   healthScoreBar: {
     flex: 1,
     height: 8,
@@ -330,24 +263,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: "hidden",
   },
-  healthScoreFill: {
-    height: "100%",
-    borderRadius: 4,
-  },
-  healthScoreLabel: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 14,
-    minWidth: 36,
-    textAlign: "right",
-  },
-  section: {
-    gap: 10,
-  },
-  sectionTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 18,
-    color: Colors.dark.text,
-  },
+  healthScoreFill: { height: "100%", borderRadius: 4 },
+  healthScoreLabel: { fontFamily: "Inter_700Bold", fontSize: 14, minWidth: 36, textAlign: "right" },
+  section: { gap: 10 },
+  sectionTitle: { fontFamily: "Inter_700Bold", fontSize: 18, color: Colors.dark.text },
   foodItem: {
     backgroundColor: Colors.dark.card,
     borderRadius: 14,
@@ -360,30 +279,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   foodItemLeft: { flex: 1, gap: 3 },
-  foodItemName: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
-    color: Colors.dark.text,
-  },
-  foodItemPortion: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 12,
-    color: Colors.dark.textMuted,
-  },
+  foodItemName: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: Colors.dark.text },
+  foodItemPortion: { fontFamily: "Inter_400Regular", fontSize: 12, color: Colors.dark.textMuted },
   foodItemRight: { alignItems: "flex-end", gap: 4 },
-  foodItemCal: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
-    color: Colors.dark.accent,
-  },
-  foodItemMacros: {
-    flexDirection: "row",
-    gap: 6,
-  },
-  foodItemMacro: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 11,
-  },
+  foodItemCal: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: Colors.dark.accent },
+  foodItemMacros: { flexDirection: "row", gap: 6 },
+  foodItemMacro: { fontFamily: "Inter_500Medium", fontSize: 11 },
   footer: {
     flexDirection: "row",
     gap: 12,
@@ -402,11 +303,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: "center",
   },
-  discardText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 16,
-    color: Colors.dark.textSecondary,
-  },
+  discardText: { fontFamily: "Inter_600SemiBold", fontSize: 16, color: Colors.dark.textSecondary },
   saveButton: {
     flex: 2,
     backgroundColor: Colors.dark.accent,
@@ -419,9 +316,5 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
-  saveText: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 16,
-    color: "#fff",
-  },
+  saveText: { fontFamily: "Inter_700Bold", fontSize: 16, color: "#fff" },
 });

@@ -1,13 +1,6 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, StyleSheet, Animated } from "react-native";
 import Svg, { Circle } from "react-native-svg";
-import Animated, {
-  useAnimatedProps,
-  useSharedValue,
-  withTiming,
-  Easing,
-} from "react-native-reanimated";
-import { useEffect } from "react";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -33,18 +26,20 @@ export function CircularProgress({
   const cx = size / 2;
   const cy = size / 2;
 
-  const animProgress = useSharedValue(0);
+  const animValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    animProgress.value = withTiming(Math.min(progress, 1), {
+    Animated.timing(animValue, {
+      toValue: Math.min(progress, 1),
       duration: 800,
-      easing: Easing.out(Easing.cubic),
-    });
+      useNativeDriver: false,
+    }).start();
   }, [progress]);
 
-  const animatedProps = useAnimatedProps(() => ({
-    strokeDashoffset: circumference * (1 - animProgress.value),
-  }));
+  const strokeDashoffset = animValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [circumference, 0],
+  });
 
   return (
     <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
@@ -65,7 +60,7 @@ export function CircularProgress({
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={circumference}
-          animatedProps={animatedProps}
+          strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
           rotation="-90"
           origin={`${cx}, ${cy}`}
