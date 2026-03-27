@@ -1,18 +1,30 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { mealsTable, foodItemSchema } from "@workspace/db/schema";
-import { eq, and } from "drizzle-orm";
+import { mealsTable } from "@workspace/db/schema";
+import { eq } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { z } from "zod";
 
 const router: IRouter = Router();
+
+// Define locally using Zod v3 to avoid cross-version mismatch with db schema (which uses zod/v4)
+const foodItemValidation = z.object({
+  name: z.string(),
+  portion: z.string().optional(),
+  calories: z.number(),
+  protein: z.number(),
+  carbs: z.number(),
+  fats: z.number(),
+  fiber: z.number().optional(),
+  sugar: z.number().optional(),
+});
 
 const logMealBodySchema = z.object({
   date: z.string(),
   time: z.string(),
   imageUrl: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
-  foodItems: z.array(foodItemSchema),
+  foodItems: z.array(foodItemValidation),
   totalCalories: z.number(),
   totalProtein: z.number(),
   totalCarbs: z.number(),
@@ -33,15 +45,24 @@ router.post("/meals/analyze", async (req, res) => {
 
   const { imageBase64 } = parsed.data;
 
-  const prompt = `Analyze this food image and return ONLY valid JSON in this exact format (no markdown, no code blocks):
+  const prompt = `You are analyzing a food photo to provide precise nutritional data.
+
+IMPORTANT INSTRUCTIONS:
+1. Look carefully at the ACTUAL amount of food visible in the image — plate size, serving containers, and food volume matter.
+2. Estimate realistic portion sizes based on what you see (not default serving sizes). E.g., if the plate has 2 cups of rice, say so.
+3. If multiple servings are visible (e.g., 2 burgers, 3 slices of pizza), count them accurately.
+4. Be specific with portions: prefer weight (e.g., "180g", "85g") or volume (e.g., "1.5 cups", "2 tbsp") over vague terms.
+5. Calculate nutritional values for the EXACT quantities estimated, not standard single servings.
+
+Return ONLY a valid JSON object (no markdown, no code blocks, no explanation) in this exact format:
 {
-  "description": "Brief description of the meal",
-  "healthScore": <number 1-10>,
+  "description": "Brief description of the meal and estimated total amount",
+  "healthScore": <integer 1-10>,
   "foodItems": [
     {
-      "name": "<food name>",
-      "portion": "<portion size e.g. '1 cup', '200g', '1 slice'>",
-      "calories": <number>,
+      "name": "<specific food name>",
+      "portion": "<exact portion e.g. '180g', '1.5 cups', '2 slices (160g)'>",
+      "calories": <number for this exact portion>,
       "protein": <grams as number>,
       "carbs": <grams as number>,
       "fats": <grams as number>,
@@ -49,7 +70,7 @@ router.post("/meals/analyze", async (req, res) => {
       "sugar": <grams as number>
     }
   ],
-  "totalCalories": <sum of all calories>,
+  "totalCalories": <sum of all item calories>,
   "totalProtein": <sum of all protein grams>,
   "totalCarbs": <sum of all carb grams>,
   "totalFats": <sum of all fat grams>
@@ -60,11 +81,6 @@ router.post("/meals/analyze", async (req, res) => {
       model: "gpt-5.2",
       max_completion_tokens: 8192,
       messages: [
-        {
-          role: "system",
-          content:
-            "You are a professional nutritionist and food recognition AI. Identify all food items, estimate realistic portion sizes, and calculate accurate nutritional information. Return ONLY valid JSON — no markdown, no explanations.",
-        },
         {
           role: "user",
           content: [
