@@ -132,7 +132,7 @@ router.get("/meals", async (req, res) => {
         totalCarbs: Number(m.totalCarbs),
         totalFats: Number(m.totalFats),
         healthScore: m.healthScore ? Number(m.healthScore) : null,
-      }))
+      })),
     );
   } catch (err) {
     req.log.error({ err }, "Failed to get meals");
@@ -143,7 +143,9 @@ router.get("/meals", async (req, res) => {
 router.post("/meals", async (req, res) => {
   const parsed = logMealBodySchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid request body", details: parsed.error });
+    res
+      .status(400)
+      .json({ error: "Invalid request body", details: parsed.error });
     return;
   }
 

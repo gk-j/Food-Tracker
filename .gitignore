@@ -84,3 +84,4 @@ connect.lock
 libpeerconnection.log
 testem.log
 /typings
+.agents
